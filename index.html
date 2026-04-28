@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What Time Is It? 國際教育互動網頁</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0284C7;
+            --secondary: #F97316;
+            --accent: #10B981;
+            --bg: #F0F9FF;
+            --white: #FFFFFF;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Fredoka', "Microsoft JhengHei", sans-serif;
+            background-color: var(--bg);
+            color: #334155;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-family: 'ZCOOL KuaiLe', cursive;
+            font-size: 3rem;
+            color: var(--primary);
+            text-shadow: 2px 2px 0px #BAE6FD;
+        }
+
+        .main-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            max-width: 1100px;
+            width: 100%;
+            background: var(--white);
+            padding: 40px;
+            border-radius: 40px;
+            border: 10px solid #BAE6FD;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 時鐘樣式 */
+        .clock-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .clock {
+            width: 300px;
+            height: 300px;
+            border: 15px solid #334155;
+            border-radius: 50%;
+            position: relative;
+            background: white;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.1);
+        }
+
+        .clock::after {
+            content: '';
+            width: 15px;
+            height: 15px;
+            background: #334155;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+        }
+
+        .hand {
+            position: absolute;
+            bottom: 50%;
+            left: 50%;
+            transform-origin: bottom;
+            border-radius: 10px;
+            transition: transform 0.5s cubic-bezier(0.4, 2.08, 0.55, 0.44);
+        }
+
+        .hour-hand {
+            width: 8px;
+            height: 70px;
+            background: #334155;
+            z-index: 3;
+        }
+
+        .minute-hand {
+            width: 5px;
+            height: 100px;
+            background: var(--secondary);
+            z-index: 2;
+        }
+
+        .number {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            padding: 10px;
+            color: #64748b;
+        }
+
+        /* 國家按鈕 */
+        .info-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .country-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .country-btn {
+            background: #F1F5F9;
+            border: 3px solid #E2E8F0;
+            border-radius: 20px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .country-btn:hover {
+            transform: translateY(-3px);
+            border-color: var(--primary);
+            background: #E0F2FE;
+        }
+
+        .country-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: #0284C7;
+        }
+
+        .culture-card {
+            background: #FFF7ED;
+            border: 3px dashed var(--secondary);
+            padding: 20px;
+            border-radius: 20px;
+            min-height: 150px;
+        }
+
+        .culture-card h3 {
+            color: var(--secondary);
+            margin-bottom: 10px;
+        }
+
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        button.tool-btn {
+            padding: 10px 20px;
+            border-radius: 50px;
+            border: none;
+            background: #334155;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button.tool-btn:hover { background: #000; }
+
+        .challenge-box {
+            grid-column: span 2;
+            background: #ECFDF5;
+            border: 4px solid var(--accent);
+            padding: 20px;
+            border-radius: 25px;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .challenge-text {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #065F46;
+            margin: 15px 0;
+        }
+
+        .hidden { display: none; }
+
+        @media (max-width: 800px) {
+            .main-container { grid-template-columns: 1fr; }
+            .challenge-box { grid-column: span 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>What Time Is It?</h1>
+        <p>點擊國家圖標，探索世界各地的時間與文化！</p>
+    </header>
+
+    <div class="main-container">
+        <!-- 左側：時鐘 -->
+        <div class="clock-section">
+            <div class="clock" id="clock">
+                <!-- 數字由 JS 生成 -->
+                <div class="hand hour-hand" id="hour-hand"></div>
+                <div class="hand minute-hand" id="minute-hand"></div>
+            </div>
+            
+            <div class="controls">
+                <button class="tool-btn" onclick="adjustTime(60)">+1 小時</button>
+                <button class="tool-btn" onclick="adjustTime(15)">+15 分鐘</button>
+                <button class="tool-btn" onclick="resetClock()" style="background: #ef4444;">重置</button>
+            </div>
+            <h2 id="digital-time" style="margin-top: 20px; font-size: 2rem; color: var(--primary);">12:00</h2>
+        </div>
+
+        <!-- 右側：資訊 -->
+        <div class="info-section">
+            <div class="country-grid">
+                <button class="country-btn" onclick="showCountry('tw')">🇹🇼 Taiwan</button>
+                <button class="country-btn" onclick="showCountry('uk')">🇬🇧 UK</button>
+                <button class="country-btn" onclick="showCountry('it')">🇮🇹 Italy</button>
+                <button class="country-btn" onclick="showCountry('sp')">🇪🇸 Spain</button>
+                <button class="country-btn" onclick="showCountry('us')">🇺🇸 USA</button>
+            </div>
+
+            <div class="culture-card" id="culture-card">
+                <h3 id="card-title">請選擇一個國家</h3>
+                <p id="card-text">點擊上方的按鈕，看看那個國家的人現在在做什麼？</p>
+            </div>
+        </div>
+
+        <!-- 挑戰區 -->
+        <div class="challenge-box">
+            <h3>🏆 時鐘快手挑戰賽 (Challenge Mode)</h3>
+            <div id="challenge-display">
+                <p>準備好接受挑戰了嗎？</p>
+                <button class="tool-btn" style="background: var(--accent); margin-top: 10px; padding: 15px 30px;" onclick="startChallenge()">開始隨機挑戰</button>
+            </div>
+            <div id="challenge-active" class="hidden">
+                <p class="challenge-text" id="target-task"></p>
+                <button class="tool-btn" onclick="checkAnswer()">我撥好了！檢查答案</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 初始化時鐘數字
+        const clock = document.getElementById('clock');
+        for (let i = 1; i <= 12; i++) {
+            const num = document.createElement('div');
+            num.className = 'number';
+            num.style.transform = `rotate(${i * 30}deg)`;
+            num.innerHTML = `<span style="display:inline-block; transform:rotate(-${i * 30}deg)">${i}</span>`;
+            clock.appendChild(num);
+        }
+
+        let currentHour = 12;
+        let currentMinute = 0;
+
+        const countries = {
+            tw: { title: "Taiwan: Dinner Time", text: "在台灣，我們大約在 6:30 PM 吃晚餐。", h: 6, m: 30, color: "#FB923C" },
+            uk: { title: "UK: Afternoon Tea", text: "英國人喜歡在 3:00 PM 喝茶吃點心。", h: 3, m: 0, color: "#FBCFE8" },
+            it: { title: "Italy: Gelato Moment", text: "義大利人在 4:30 PM 喜歡散步吃冰淇淋。", h: 4, m: 30, color: "#A7F3D0" },
+            sp: { title: "Spain: Late Dinner", text: "西班牙人超晚吃晚餐！大約是 9:00 PM。", h: 9, m: 0, color: "#FECACA" },
+            us: { title: "USA: School Bus", text: "美國學生很早起，7:30 AM 就要搭校車。", h: 7, m: 30, color: "#FEF08A" }
+        };
+
+        function updateClock() {
+            const hDeg = (currentHour % 12) * 30 + (currentMinute / 60) * 30;
+            const mDeg = currentMinute * 6;
+            
+            document.getElementById('hour-hand').style.transform = `translateX(-50%) rotate(${hDeg}deg)`;
+            document.getElementById('minute-hand').style.transform = `translateX(-50%) rotate(${mDeg}deg)`;
+            
+            const displayH = currentHour.toString().padStart(2, '0');
+            const displayM = currentMinute.toString().padStart(2, '0');
+            document.getElementById('digital-time').innerText = `${displayH}:${displayM}`;
+        }
+
+        function showCountry(code) {
+            const data = countries[code];
+            currentHour = data.h;
+            currentMinute = data.m;
+            updateClock();
+
+            document.getElementById('card-title').innerText = data.title;
+            document.getElementById('card-text').innerText = data.text;
+            document.getElementById('culture-card').style.background = data.color;
+            
+            // 移除其他按鈕的 active
+            document.querySelectorAll('.country-btn').forEach(btn => btn.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+        }
+
+        function adjustTime(mins) {
+            currentMinute += mins;
+            if (currentMinute >= 60) {
+                currentHour += Math.floor(currentMinute / 60);
+                currentMinute %= 60;
+            }
+            if (currentHour > 12) currentHour -= 12;
+            updateClock();
+        }
+
+        function resetClock() {
+            currentHour = 12;
+            currentMinute = 0;
+            updateClock();
+            document.getElementById('card-title').innerText = "請選擇一個國家";
+            document.getElementById('card-text').innerText = "點擊上方的按鈕，看看那個國家的人現在在做什麼？";
+            document.getElementById('culture-card').style.background = "#FFF7ED";
+            document.querySelectorAll('.country-btn').forEach(btn => btn.classList.remove('active'));
+        }
+
+        // 挑戰賽邏輯
+        let targetH = 0;
+        let targetM = 0;
+
+        function startChallenge() {
+            const keys = Object.keys(countries);
+            const randomKey = keys[Math.floor(Math.random() * keys.length)];
+            const goal = countries[randomKey];
+            
+            targetH = goal.h;
+            targetM = goal.m;
+
+            document.getElementById('challenge-display').classList.add('hidden');
+            document.getElementById('challenge-active').classList.remove('hidden');
+            document.getElementById('target-task').innerText = `請撥出「${goal.title}」的時間！`;
+            
+            resetClock();
+        }
+
+        function checkAnswer() {
+            if (currentHour === targetH && currentMinute === targetM) {
+                alert("太棒了！完全正確！🎉");
+                document.getElementById('challenge-display').classList.remove('hidden');
+                document.getElementById('challenge-active').classList.add('hidden');
+            } else {
+                alert("哎呀，時間不太對喔，再試試看！加油！💪");
+            }
+        }
+
+        // 初始化
+        updateClock();
+    </script>
+</body>
+</html>
